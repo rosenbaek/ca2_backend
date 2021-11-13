@@ -29,7 +29,7 @@ public class Populator {
         EntityManagerFactory emf = EMF_Creator.createEntityManagerFactory();
         EntityManager em = emf.createEntityManager();
         
-        BufferedReader lineReader = new BufferedReader(new FileReader("stations.csv"));
+        BufferedReader lineReader = new BufferedReader(new FileReader("resources/stations.csv"));
         String lineText = null;
 
         
