@@ -72,4 +72,24 @@ public class StationFacade {
         return new UserDTO(user);
     }
     
+    public UserDTO deleteStationFromUser(String username, int stationID) throws API_Exception{
+        EntityManager em = emf.createEntityManager();
+        User user;
+        Station station;
+        try {
+            user = em.find(User.class, username);
+            station = em.find(Station.class, stationID);
+            if (user == null || station == null) {
+                throw new API_Exception("Invalid user name or station id");
+            }
+            user.deleteStation(station);
+            em.getTransaction().begin();
+            user = em.merge(user);
+            em.getTransaction().commit();
+        } finally {
+            em.close();
+
+        }
+        return new UserDTO(user);
+    }
 }

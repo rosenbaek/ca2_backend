@@ -6,6 +6,7 @@
 package entities;
 
 import entities.User;
+import errorhandling.API_Exception;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -83,6 +84,14 @@ public class Station implements Serializable {
 
     public void addUser(User user) {
         this.users.add(user);
+    }
+    
+    public void deleteUser(User user) throws API_Exception{
+        if (this.users.contains(user)) {
+            this.users.remove(user);
+        } else {
+            throw new API_Exception("Station not connected to user");
+        }
     }
 
     @Override

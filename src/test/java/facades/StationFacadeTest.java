@@ -106,6 +106,14 @@ public class StationFacadeTest extends TestCase {
     }
     
     @Test
+    public void testDeleteStationFromUser() throws API_Exception {
+        StationFacade instance = StationFacade.getStationFacade(emf);
+        int expResult = 0;
+        UserDTO userDTO = instance.addStationToUser(user.getUserName(), 123);
+        assertEquals(expResult, userDTO.getStations().size());
+    }
+    
+    @Test
     public void testUpdateUserRole() {
         UserFacade instance = UserFacade.getUserFacade(emf);
         Role newRole = new Role("newRole");
