@@ -12,12 +12,14 @@ import entities.Role;
 import entities.Station;
 import entities.User;
 import errorhandling.API_Exception;
+import errorhandling.NotFoundException;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import junit.framework.TestCase;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.AfterAll;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import utils.EMF_Creator;
@@ -29,7 +31,9 @@ public class StationFacadeTest extends TestCase {
     private static EntityManagerFactory emf;
     private static StationFacade facade;
     private User user;
+    private User user2;
     private Station station1;
+    private Role adminRole;
     
     public StationFacadeTest() {
         
@@ -57,18 +61,25 @@ public class StationFacadeTest extends TestCase {
             
 
             Role userRole = new Role("user"); 
+            adminRole = new Role("admin"); 
             Station station = new Station(123,"new station");
             station1 = new Station(1,"new station1");
             user = new User("user", "test");
             user.addRole(userRole);
             user.addStation(station);
             
+            user2 = new User("user2", "test2");
+            user2.addRole(userRole);
+            user2.addStation(station);
+            user2.addStation(station1);
             
+            em.persist(adminRole);
             em.persist(userRole);
             em.persist(station);
             em.persist(station1);
             
             em.persist(user);
+            em.persist(user2);
 
             em.getTransaction().commit();
         } finally {
@@ -109,17 +120,33 @@ public class StationFacadeTest extends TestCase {
     public void testDeleteStationFromUser() throws API_Exception {
         StationFacade instance = StationFacade.getStationFacade(emf);
         int expResult = 0;
-        UserDTO userDTO = instance.addStationToUser(user.getUserName(), 123);
+        UserDTO userDTO = instance.deleteStationFromUser(user.getUserName(), 123);
         assertEquals(expResult, userDTO.getStations().size());
     }
     
     @Test
-    public void testUpdateUserRole() {
+    public void testGetStationsByUser() {
+        StationFacade instance = StationFacade.getStationFacade(emf);
+        int expResult = 2;
+        List<StationDTO> stationDTOs = instance.getStationsByUser(user2);
+        assertEquals(expResult, stationDTOs.size());
+    }
+    
+    @Test
+    public void testUpdateUserRole() throws NotFoundException {
+        UserFacade instance = UserFacade.getUserFacade(emf); 
+        user.addRole(adminRole);
+        UserDTO userDTO = instance.updateUser(user);
+        assertEquals(2, userDTO.getRoles().size());
+    }
+    
+    @Test
+    public void testUpdateUserRoleThatNotExist() throws NotFoundException {
         UserFacade instance = UserFacade.getUserFacade(emf);
         Role newRole = new Role("newRole");
         user.addRole(newRole);
-        instance.updateUser(user);
-        assertEquals(2, user.getRoleList().size());
+        Throwable exception = assertThrows(NotFoundException.class, () -> instance.updateUser(user));
+        assertEquals("Role doesn't exist", exception.getMessage());
     }
     
 }

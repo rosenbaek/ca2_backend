@@ -44,6 +44,14 @@ public class UserDTO {
     public void setStations(List<StationDTO> stations) {
         this.stations = stations;
     }
+
+    public List<RoleDTO> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(List<RoleDTO> roles) {
+        this.roles = roles;
+    }
     
     
 }

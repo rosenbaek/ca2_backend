@@ -51,6 +51,14 @@ public class StationFacade {
         return StationDTO.getDtos(stations);
     }
     
+    public List<StationDTO> getStationsByUser(User user) {
+        EntityManager em = emf.createEntityManager();
+        TypedQuery<Station> query = em.createQuery("SELECT s FROM Station s INNER JOIN s.users u WHERE u.userName = :username", Station.class);
+        query.setParameter("username", user.getUserName());
+        List<Station> stations = query.getResultList();
+        return StationDTO.getDtos(stations);
+    }
+    
     public UserDTO addStationToUser(String username, int stationID) throws API_Exception {
         EntityManager em = emf.createEntityManager();
         User user;

@@ -74,9 +74,17 @@ public class UserFacade {
         return new UserDTO(user);
     }
     
-    public UserDTO updateUser(User user) {
+    public UserDTO updateUser(User user) throws NotFoundException {
         EntityManager em = emf.createEntityManager();
         User newUser;
+        //Makes sure roles is managed objects and checks that it exist
+        for (int i = 0; i < user.getRoleList().size(); i++) {
+            Role role = user.getRoleList().get(i);
+            role = em.find(Role.class, role.getRoleName());
+            if (role == null) {
+                throw new NotFoundException("Role doesn't exist");
+            }
+        }
         try {
             em.getTransaction().begin();
                 newUser = em.merge(user);
