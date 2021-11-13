@@ -5,15 +5,13 @@
  */
 package facades;
 
-import dtos.StationDTO;
+import dtos.StationsDTO;
 import dtos.user.UserDTO;
-import entities.RenameMe;
 import entities.Role;
 import entities.Station;
 import entities.User;
 import errorhandling.API_Exception;
 import errorhandling.NotFoundException;
-import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import junit.framework.TestCase;
@@ -77,7 +75,6 @@ public class StationFacadeTest extends TestCase {
             em.persist(userRole);
             em.persist(station);
             em.persist(station1);
-            
             em.persist(user);
             em.persist(user2);
 
@@ -93,17 +90,13 @@ public class StationFacadeTest extends TestCase {
     }
 
     
-
-    /**
-     * Test of getStations method, of class StationFacade.
-     */
     @Test
     public void testGetStations() {
         System.out.println("getStations");
         StationFacade instance = StationFacade.getStationFacade(emf);
         int expResult = 2;
-        int result = instance.getStations().size();
-        assertEquals(expResult, result);
+        StationsDTO stationsDTO = instance.getStations();
+        assertEquals(expResult, stationsDTO.getStations().size());
        
     }
 
@@ -128,8 +121,8 @@ public class StationFacadeTest extends TestCase {
     public void testGetStationsByUser() {
         StationFacade instance = StationFacade.getStationFacade(emf);
         int expResult = 2;
-        List<StationDTO> stationDTOs = instance.getStationsByUser(user2);
-        assertEquals(expResult, stationDTOs.size());
+        StationsDTO stationsDTO = instance.getStationsByUser(user2.getUserName());
+        assertEquals(expResult, stationsDTO.getStations().size());
     }
     
     @Test

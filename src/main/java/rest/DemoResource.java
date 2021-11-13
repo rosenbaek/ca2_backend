@@ -10,6 +10,8 @@ import dtos.CombinedApiDTO;
 import dtos.WeatherDTO;
 import dtos.CurrencyApiDTO;
 import entities.User;
+import facades.Populator;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -69,6 +71,20 @@ public class DemoResource {
             TypedQuery<User> query = em.createQuery ("select u from User u",entities.User.class);
             List<User> users = query.getResultList();
             return "[" + users.size() + "]";
+        } finally {
+            em.close();
+        }
+    }
+    
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("populate")
+    public String populate() throws IOException {
+
+        EntityManager em = EMF.createEntityManager();
+        try {
+            Populator.populate();
+            return "done";
         } finally {
             em.close();
         }

@@ -7,6 +7,16 @@ package facades;
 
 import dtos.RenameMeDTO;
 import entities.RenameMe;
+import entities.Station;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import utils.EMF_Creator;
 
@@ -15,15 +25,34 @@ import utils.EMF_Creator;
  * @author tha
  */
 public class Populator {
-    public static void populate(){
+    public static void populate() throws FileNotFoundException, IOException{
         EntityManagerFactory emf = EMF_Creator.createEntityManagerFactory();
-        FacadeExample fe = FacadeExample.getFacadeExample(emf);
-        fe.create(new RenameMeDTO(new RenameMe("First 1", "Last 1")));
-        fe.create(new RenameMeDTO(new RenameMe("First 2", "Last 2")));
-        fe.create(new RenameMeDTO(new RenameMe("First 3", "Last 3")));
+        EntityManager em = emf.createEntityManager();
+        
+        BufferedReader lineReader = new BufferedReader(new FileReader("stations.csv"));
+        String lineText = null;
+
+        
+
+        lineReader.readLine();
+        em.getTransaction().begin();
+        while ((lineText = lineReader.readLine()) != null) {
+            String[] data = lineText.split(",");
+            String[] courseName = data[0].split(";");
+            
+            em.persist(new Station(Integer.parseInt(courseName[0]),courseName[1]));
+            
+            
+        }
+        em.getTransaction().commit();
+        lineReader.close();
     }
     
     public static void main(String[] args) {
-        populate();
+        try {
+            populate();
+        } catch (IOException ex) {
+            System.out.println(ex.getMessage());
+        }
     }
 }

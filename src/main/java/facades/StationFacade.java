@@ -7,6 +7,7 @@ package facades;
 
 import dtos.RenameMeDTO;
 import dtos.StationDTO;
+import dtos.StationsDTO;
 import dtos.user.UserDTO;
 import entities.RenameMe;
 import entities.Station;
@@ -44,19 +45,19 @@ public class StationFacade {
         return instance;
     }
     
-    public List<StationDTO> getStations() {
+    public StationsDTO getStations() {
         EntityManager em = emf.createEntityManager();
         TypedQuery<Station> query = em.createQuery("SELECT s FROM Station s", Station.class);
         List<Station> stations = query.getResultList();
-        return StationDTO.getDtos(stations);
+        return new StationsDTO(stations);
     }
     
-    public List<StationDTO> getStationsByUser(User user) {
+    public StationsDTO getStationsByUser(String username) {
         EntityManager em = emf.createEntityManager();
         TypedQuery<Station> query = em.createQuery("SELECT s FROM Station s INNER JOIN s.users u WHERE u.userName = :username", Station.class);
-        query.setParameter("username", user.getUserName());
+        query.setParameter("username", username);
         List<Station> stations = query.getResultList();
-        return StationDTO.getDtos(stations);
+        return new StationsDTO(stations);
     }
     
     public UserDTO addStationToUser(String username, int stationID) throws API_Exception {
@@ -99,5 +100,9 @@ public class StationFacade {
 
         }
         return new UserDTO(user);
+    }
+
+    private List<StationDTO> StationsDTO(List<Station> stations) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }
