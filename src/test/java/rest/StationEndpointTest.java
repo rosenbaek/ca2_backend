@@ -35,6 +35,7 @@ public class StationEndpointTest {
     private static final int SERVER_PORT = 7777;
     private static final String SERVER_URL = "http://localhost/api";
     private User user;
+    
     private User user2;
     private Station station1;
     private Role adminRole;
@@ -81,7 +82,7 @@ public class StationEndpointTest {
             em.createQuery("delete from Station").executeUpdate();
 
             Role userRole = new Role("user");
-            adminRole = new Role("admin");
+            Role adminRole = new Role("admin");
             Station station = new Station(123, "new station");
             station1 = new Station(1, "new station1");
             user = new User("user", "test");
@@ -93,6 +94,10 @@ public class StationEndpointTest {
             user2.addStation(station);
             user2.addStation(station1);
 
+            
+            User admin = new User("admin", "testAdmin");
+            admin.addRole(adminRole);
+            
             em.persist(adminRole);
             em.persist(userRole);
             em.persist(station);
@@ -100,6 +105,7 @@ public class StationEndpointTest {
 
             em.persist(user);
             em.persist(user2);
+            em.persist(admin);
 
             em.getTransaction().commit();
         } finally {
@@ -121,7 +127,7 @@ public class StationEndpointTest {
                 .when().post("/login")
                 .then()
                 .extract().path("token");
-        //System.out.println("TOKEN ---> " + securityToken);
+        System.out.println("TOKEN ---> " + securityToken);
     }
 
     private void logOut() {
@@ -138,15 +144,20 @@ public class StationEndpointTest {
                 .statusCode(200)
                 .body("stations.station_id", hasItems(1, 123));
 
+        
+      
     }
     
     
     @Test
     public void testRestGetAllStationsByUser() {
+        login("admin", "testAdmin");
         given()
                 .contentType("application/json")
+                .header("x-access-token", securityToken)
                 .when()
-                .get("/station/"+user.getUserName()).then()
+                .get("/station/"+user.getUserName())
+                .then()
                 .statusCode(200)
                 .body("stations.station_id", hasItems(123));
 

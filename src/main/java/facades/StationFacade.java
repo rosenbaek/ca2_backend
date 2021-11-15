@@ -65,14 +65,13 @@ public class StationFacade {
         User user;
         Station station;
         try {
+            em.getTransaction().begin();
             user = em.find(User.class, username);
             station = em.find(Station.class, stationID);
             if (user == null || station == null) {
                 throw new API_Exception("Invalid user name or station id");
             }
             user.addStation(station);
-            em.getTransaction().begin();
-            user = em.merge(user);
             em.getTransaction().commit();
         } finally {
             em.close();

@@ -16,6 +16,7 @@ import errorhandling.API_Exception;
 import facades.StationFacade;
 import facades.UserFacade;
 import java.util.List;
+import javax.annotation.security.RolesAllowed;
 import javax.persistence.EntityManagerFactory;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
@@ -29,6 +30,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
 import static rest.UserResource.USER_FACADE;
 import utils.EMF_Creator;
 
@@ -43,7 +45,12 @@ public class StationResource {
     public static final StationFacade STATION_FACADE = StationFacade.getStationFacade(EMF);
     private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
    
-
+    @Context
+    private UriInfo context;
+    
+    @Context
+    SecurityContext securityContext;
+    
     @GET
     @Produces({MediaType.APPLICATION_JSON})
     public Response getStations(@PathParam("username") String username) throws API_Exception, Exception {
@@ -55,7 +62,13 @@ public class StationResource {
     @Path("/{username}")
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
+    @RolesAllowed({"user", "admin"})
     public Response getStationsByUser(@PathParam("username") String username) throws API_Exception, Exception {
+        String tokenUsername = securityContext.getUserPrincipal().getName();
+        System.out.println("USER ROLE BOOLEAN --->" +!securityContext.isUserInRole("admin"));
+        if (!securityContext.isUserInRole("admin") && !username.equals(tokenUsername)) {
+            throw new API_Exception("You cant change another users items");
+        }
         StationsDTO stationsDTO = STATION_FACADE.getStationsByUser(username);
         return Response.ok().entity(gson.toJson(stationsDTO)).build();
     }
@@ -63,10 +76,15 @@ public class StationResource {
     @POST
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
+    @RolesAllowed({"user", "admin"})
     public Response addStationToUser(String jsonString) throws API_Exception, Exception {
         JsonParser parser = new JsonParser();
         JsonObject o = parser.parse(jsonString).getAsJsonObject();
         String username = o.get("username").getAsString();
+        String tokenUsername = securityContext.getUserPrincipal().getName();
+        if (!securityContext.isUserInRole("admin") && !username.equals(tokenUsername)) {
+            throw new API_Exception("You cant change another users items");
+        }
         int stationID = o.get("station_id").getAsInt();
   
         UserDTO userDTO = STATION_FACADE.addStationToUser(username,stationID);
@@ -76,10 +94,15 @@ public class StationResource {
     @DELETE
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
+    @RolesAllowed({"user", "admin"})
     public Response deleteStationFromUser(String jsonString) throws API_Exception, Exception {
         JsonParser parser = new JsonParser();
         JsonObject o = parser.parse(jsonString).getAsJsonObject();
         String username = o.get("username").getAsString();
+        String tokenUsername = securityContext.getUserPrincipal().getName();
+        if (!securityContext.isUserInRole("admin") && !username.equals(tokenUsername)) {
+            throw new API_Exception("You cant change another users items");
+        }
         int stationID = o.get("station_id").getAsInt();
         UserDTO userDTO = STATION_FACADE.deleteStationFromUser(username, stationID);
         return Response.ok().entity(gson.toJson(userDTO)).build();

@@ -105,7 +105,7 @@ public class LoginEndpointTest {
                 .when().post("/login")
                 .then()
                 .extract().path("token");
-        //System.out.println("TOKEN ---> " + securityToken);
+        System.out.println("TOKEN ---> " + securityToken);
     }
 
     private void logOut() {
